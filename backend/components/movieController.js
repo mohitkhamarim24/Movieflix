@@ -12,16 +12,19 @@ const isStale = (date) => {
   return diff > 24;
 };
 
-
+const safeParseYear = (yearStr) => {
+  const parsed = parseInt(yearStr);
+  return isNaN(parsed) ? null : parsed;
+};
 const transformMovieData = (data) => ({
   omdbId: data.imdbID,
   title: data.Title,
-  year: parseInt(data.Year),
+ year: safeParseYear(data.Year),
   genre: data.Genre?.split(',').map(g => g.trim()),
   director: data.Director,
   actors: data.Actors?.split(',').map(a => a.trim()),
-  rating: parseFloat(data.imdbRating),
-  runtime: parseInt(data.Runtime) || 0,
+  rating:safeParseYear(data.imdbRating),
+  runtime: safeParseYear(data.Runtime) || 0,
   poster: data.Poster,
   fetchedAt: new Date()
 });
@@ -61,7 +64,7 @@ export const searchMovies = async (req, res) => {
         fullResults.push(transformed);
       }
     }
-
+   
     res.json(fullResults);
   } catch (err) {
     console.error("OMDb error:", err);
@@ -99,6 +102,53 @@ export const getMovieById = async (req, res) => {
     res.json(movie);
   } catch (err) {
     console.error("Get movie by ID error:", err);
+    res.status(500).json({ msg: "Server error", error: err.message });
+  }
+};
+
+export const getMovieAnalytics = async (req, res) => {
+  try {
+    // 1. Genre Count (flatten genres array and group)
+    const genreAggregation = await Movie.aggregate([
+      { $unwind: "$genre" },
+      { $group: { _id: "$genre", count: { $sum: 1 } } },
+      { $sort: { count: -1 } }
+    ]);
+
+    // 2. Average Rating of All Movies
+    const avgRatingAggregation = await Movie.aggregate([
+      {
+        $group: {
+          _id: null,
+          avgRating: { $avg: "$rating" }
+        }
+      }
+    ]);
+    const avgRating = avgRatingAggregation[0]?.avgRating?.toFixed(2) || 0;
+
+    // 3. Average Runtime Grouped by Year
+    const runtimeByYear = await Movie.aggregate([
+      {
+        $group: {
+          _id: "$year",
+          avgRuntime: { $avg: "$runtime" },
+          count: { $sum: 1 }
+        }
+      },
+      { $sort: { _id: 1 } }
+    ]);
+
+    res.json({
+      genreCount: genreAggregation.map(g => ({ genre: g._id, count: g.count })),
+      averageRating: parseFloat(avgRating),
+      runtimeByYear: runtimeByYear.map(y => ({
+        year: y._id,
+        avgRuntime: parseFloat(y.avgRuntime.toFixed(2)),
+        movieCount: y.count
+      }))
+    });
+  } catch (err) {
+    console.error("Analytics error:", err);
     res.status(500).json({ msg: "Server error", error: err.message });
   }
 };
