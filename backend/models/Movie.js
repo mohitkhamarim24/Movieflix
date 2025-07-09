@@ -9,6 +9,7 @@ const movieSchema = new mongoose.Schema({
   actors: [String],
   rating: Number,
   runtime: Number,
+  poster: String,
   fetchedAt: { type: Date, default: Date.now } // for TTL cleanup
 });
 
