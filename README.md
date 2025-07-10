@@ -3,7 +3,7 @@
 A full-stack movie analytics dashboard where users can search, filter, view details, and visualize trends in movies.
 
 ## 🔗 Live Demo
-- Frontend: https://movieflix-dashboard.netlify.app/
+- Frontend: https://movieflix-mohit-khamaris-projects.vercel.app/
 - Backend API: https://movieflix-api.onrender.com/
 
 ---
