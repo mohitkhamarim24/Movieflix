@@ -2,6 +2,7 @@ import axios from 'axios';
 import dotenv from 'dotenv';
 import { Movie } from "../models/Movie.js";
 
+
 dotenv.config();
 const OMDB_API_KEY = process.env.OMDB_API_KEY;
 
@@ -137,6 +138,24 @@ export const getMovieAnalytics = async (req, res) => {
       },
       { $sort: { _id: 1 } }
     ]);
+  // 4. Average Ratings by Genre
+      const avgRatingsByGenre = await Movie.aggregate([
+  { $unwind: "$genre" },
+  {
+    $group: {
+      _id: "$genre",
+      avgRating: { $avg: "$rating" }
+    }
+  },
+  {
+    $project: {
+      genre: "$_id",
+      rating: { $round: ["$avgRating", 2] },
+      _id: 0
+    }
+  },
+  { $sort: { rating: -1 } }
+]);
 
     res.json({
       genreCount: genreAggregation.map(g => ({ genre: g._id, count: g.count })),
@@ -150,6 +169,34 @@ export const getMovieAnalytics = async (req, res) => {
   } catch (err) {
     console.error("Analytics error:", err);
     res.status(500).json({ msg: "Server error", error: err.message });
+  }
+};
+
+export const getMovies = async (req, res) => {
+  try {
+    const { search, filter } = req.query;
+
+    const query = {};
+
+    // Handle text search
+    if (search) {
+      query.title = { $regex: search, $options: "i" };
+    }
+
+    // Handle genre filter
+    if (filter) {
+      const [key, value] = filter.split(":");
+      if (key === "genre") {
+        const genres = value.split(",");
+        query.genre = { $in: genres };
+      }
+    }
+
+    const movies = await Movie.find(query).limit(100);
+    res.json(movies);
+  } catch (err) {
+    console.error("Error fetching movies:", err);
+    res.status(500).json({ msg: "Server error" });
   }
 };
 
