@@ -15,7 +15,7 @@ const Analytics = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const res = await axios.get(`${apiBase}/api/movies/analytic`, {
+        const res = await axios.get(`${apiBase}/api/movies/analytics`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
