@@ -39,6 +39,7 @@ const handleGenreChange = (selectedOptions) => {
 };
 
   const token = localStorage.getItem("token");
+  const apiBase = import.meta.env.VITE_BACKEND_URL;
 
   const handleSearch = async (e) => {
     e.preventDefault();
@@ -52,7 +53,7 @@ const handleGenreChange = (selectedOptions) => {
         params.filter = `genre:${selectedGenres.join(",")}`;
       }
 
-      const res = await axios.get("http://localhost:5000/api/movies", {
+      const res = await axios.get(`${apiBase}/api/movies`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

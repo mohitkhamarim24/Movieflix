@@ -7,7 +7,7 @@ import {
 } from "recharts";
 
 const COLORS = ["#8884d8", "#82ca9d", "#ffc658", "#ff6b6b", "#00c49f", "#ffb347", "#6a5acd", "#ffa07a"];
-
+ const apiBase = import.meta.env.VITE_BACKEND_URL;
 const Analytics = () => {
   const [data, setData] = useState(null);
   const token = localStorage.getItem("token");
@@ -15,7 +15,7 @@ const Analytics = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/movies/analytics", {
+        const res = await axios.get(`${apiBase}/api/movies/analytic`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },

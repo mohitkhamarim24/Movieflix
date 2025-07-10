@@ -12,16 +12,16 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-
+  const apiBase = import.meta.env.VITE_BACKEND_URL;
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post("http://localhost:5000/api/auth/login", {
+      const res = await axios.post(`${apiBase}/api/auth/login`, {
         email,
         password,
       });
       login(res.data.user, res.data.token);
-      navigate("/");
+      navigate("/dashboard");
     } catch (err) {
       console.error(err);
       setError(err?.response?.data?.msg || "Login failed.");

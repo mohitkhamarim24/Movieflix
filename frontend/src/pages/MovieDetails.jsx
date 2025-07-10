@@ -11,8 +11,9 @@ const MovieDetail = () => {
 
   useEffect(() => {
     const fetchMovie = async () => {
+      const apiBase = import.meta.env.VITE_BACKEND_URL;
       try {
-        const res = await axios.get(`http://localhost:5000/api/movies/${id}`, {
+        const res = await axios.get(`${apiBase}/api/movies${id}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },

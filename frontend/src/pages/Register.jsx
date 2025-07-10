@@ -12,12 +12,12 @@ const Register = () => {
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
-
+const apiBase = import.meta.env.VITE_BACKEND_URL;
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     try {
-      await axios.post("http://localhost:5000/api/auth/register", form);
+      await axios.post(`${apiBase}/api/auth/register`, form);
       alert("Registration successful!");
       navigate("/login");
     } catch (err) {
